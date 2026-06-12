@@ -37,13 +37,16 @@
                 <i class="fa fa-users"></i> Data Pasien
             </a>
             <div class="nav-section">Apotek & Kasir</div>
-            <a href="{{ route('admin.resep.index') }}" class="nav-link @active('admin/resep*')">
-                <i class="fa fa-prescription"></i> Resep Masuk
+            <a href="{{ route('admin.resep.index') }}" class="nav-link d-flex justify-content-between align-items-center @active('admin/resep*')">
+                <div><i class="fa fa-prescription"></i> Resep Masuk</div>
                 @php $resepMenunggu = \App\Models\Resep::where('status','menunggu')->count() @endphp
-                @if($resepMenunggu > 0) <span class="badge bg-danger">{{ $resepMenunggu }}</span> @endif
+                @if($resepMenunggu > 0) <span class="badge bg-danger rounded-pill">{{ $resepMenunggu }}</span> @endif
             </a>
             <a href="{{ route('admin.kasir.index') }}" class="nav-link @active('admin/kasir*')">
                 <i class="fa fa-cash-register"></i> Kasir
+            </a>
+            <a href="{{ route('admin.nota.index') }}" class="nav-link @active('admin/nota*')">
+                <i class="fa fa-file-invoice-dollar"></i> Riwayat Nota
             </a>
             <div class="nav-section">Master Data</div>
             <a href="{{ route('admin.obat.index') }}" class="nav-link @active('admin/obat*')">

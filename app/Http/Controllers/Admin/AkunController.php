@@ -28,7 +28,6 @@ class AkunController extends Controller
             'password'  => 'required|min:6|confirmed',
             'role'      => 'required|in:admin,dokter',
             'no_hp'     => 'nullable|string|max:15',
-            'spesialis' => 'nullable|string|max:100',
         ]);
 
         User::create([
@@ -37,26 +36,25 @@ class AkunController extends Controller
             'password'  => Hash::make($request->password),
             'role'      => $request->role,
             'no_hp'     => $request->no_hp,
-            'spesialis' => $request->spesialis,
             'aktif'     => true,
         ]);
 
         return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil dibuat.');
     }
 
-    public function edit(User $user)
+    public function edit(User $akun) 
     {
+        $user = $akun; 
         return view('admin.akun.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $akun)
     {
         $request->validate([
             'name'      => 'required|string|max:100',
-            'email'     => 'required|email|unique:users,email,' . $user->id,
+            'email'     => 'required|email|unique:users,email,' . $akun->id,
             'role'      => 'required|in:admin,dokter',
             'no_hp'     => 'nullable|string|max:15',
-            'spesialis' => 'nullable|string|max:100',
             'password'  => 'nullable|min:6|confirmed',
         ]);
 
@@ -65,7 +63,7 @@ class AkunController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        $user->update($data);
+        $akun->update($data);
         return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil diperbarui.');
     }
 
@@ -78,19 +76,13 @@ class AkunController extends Controller
         return back()->with('success', 'Status akun berhasil diubah.');
     }
 
-    /**
-     * TAMBAHAN: Fungsi Hapus (Soft Delete) Akun Pengguna / Dokter
-     */
-    public function destroy(User $user)
+    public function destroy(User $akun)
     {
-        // Cegah admin menghapus dirinya sendiri yang sedang login
-        if ($user->id === auth()->id()) {
+        if ($akun->id === auth()->id()) {
             return back()->with('error', 'Tidak bisa menghapus akun sendiri yang sedang digunakan.');
         }
 
-        // Menjalankan soft delete karena model User sudah pakai 'use SoftDeletes'
-        $user->delete();
-
+        $akun->delete();
         return redirect()->route('admin.akun.index')->with('success', 'Akun berhasil dihapus.');
     }
 }

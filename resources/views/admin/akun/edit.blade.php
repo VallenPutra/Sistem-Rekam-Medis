@@ -11,8 +11,10 @@
         @if($errors->any())
         <div class="alert alert-danger">@foreach($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>
         @endif
+        
         <form method="POST" action="{{ route('admin.akun.update', $user) }}">
             @csrf @method('PUT')
+            
             <div class="mb-3">
                 <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
@@ -27,10 +29,6 @@
                     <option value="admin" {{ $user->role=='admin'?'selected':'' }}>Admin</option>
                     <option value="dokter" {{ $user->role=='dokter'?'selected':'' }}>Dokter</option>
                 </select>
-            </div>
-            <div class="mb-3" id="spesialisField" style="{{ $user->role=='dokter'?'':'display:none' }}">
-                <label class="form-label">Spesialis</label>
-                <input type="text" name="spesialis" class="form-control" value="{{ old('spesialis', $user->spesialis) }}">
             </div>
             <div class="mb-3">
                 <label class="form-label">No HP</label>
@@ -53,11 +51,4 @@
 </div>
 </div>
 </div>
-@push('scripts')
-<script>
-document.getElementById('roleSelect').addEventListener('change', function() {
-    document.getElementById('spesialisField').style.display = this.value === 'dokter' ? '' : 'none';
-});
-</script>
-@endpush
 @endsection

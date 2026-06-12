@@ -2,45 +2,53 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Auth; // Pastikan ini ditambahkan di atas
+use Illuminate\Support\Facades\Auth;
 
-// ---- Auth ----
+// Auth & Pengalihan Awal
 Route::get('/', function () {
     // 1. Cek apakah ada cookie / session login yang aktif
     if (Auth::check()) {
         $user = Auth::user();
         
-        // 2. Jika dia admin, langsung terbangkan ke dashboard admin
-        if ($user->isAdmin()) { // atau gunakan $user->role === 'admin' sesuai modelmu
+        if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
         
-        // 3. Jika dia dokter, langsung terbangkan ke dashboard dokter
         return redirect()->route('dokter.dashboard');
     }
 
-    // 4. Kalau benar-benar belum login, baru lempar ke halaman login biasa
     return redirect()->route('login');
 });
 
-Route::get('/login',    [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
-Route::post('/login',   [AuthController::class, 'login'])->middleware('guest');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register')->middleware('guest');
-Route::post('/register',[AuthController::class, 'register'])->middleware('guest');
-Route::post('/logout',  [AuthController::class, 'logout'])->name('logout');
+// ---- Rute Otentikasi Umum (GUEST) ----
+Route::middleware('guest')->group(function () {
+    Route::get('/login',     [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::get('/register',  [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 
+    // PERBAIKAN: Menambahkan Fitur Lupa Password Resmi ke Gmail
+    Route::get('/forgot-password',  [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password',        [AuthController::class, 'updatePassword'])->name('password.update');
+});
+
+// Logout (Harus Sudah Login)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+
+// ---- GROUP ADMIN ----
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Manajemen Akun (PERBAIKAN: destroy dihapus dari except karena sudah pakai Soft Delete)
     Route::resource('akun', App\Http\Controllers\Admin\AkunController::class)
         ->except(['show']);
     Route::patch('akun/{user}/toggle-aktif', [App\Http\Controllers\Admin\AkunController::class, 'toggleAktif'])
         ->name('akun.toggle-aktif');
 
-    // Pasien (Tetap haram dihapus total)
     Route::resource('pasien', App\Http\Controllers\Admin\PasienController::class)
         ->except(['destroy']);
 
@@ -48,7 +56,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/antrian',          [App\Http\Controllers\Admin\AntrianController::class, 'index'])->name('antrian.index');
     Route::get('/antrian/daftar',   [App\Http\Controllers\Admin\AntrianController::class, 'create'])->name('antrian.create');
     Route::post('/antrian',         [App\Http\Controllers\Admin\AntrianController::class, 'store'])->name('antrian.store');
-    // PERBAIKAN: Tambah rute manual untuk membatalkan/menghapus antrian
     Route::delete('/antrian/{kunjungan}', [App\Http\Controllers\Admin\AntrianController::class, 'destroy'])->name('antrian.destroy');
 
     // Resep (Apotek)
@@ -62,20 +69,25 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/kasir/{kunjungan}/bayar', [App\Http\Controllers\Admin\KasirController::class, 'bayar'])->name('kasir.bayar');
     Route::get('/kasir/{kunjungan}/nota', [App\Http\Controllers\Admin\KasirController::class, 'nota'])->name('kasir.nota');
 
-    // Obat (PERBAIKAN: destroy dihapus dari except agar fungsi hapus obat aktif)
+    // Nota
+    Route::get('/nota', [App\Http\Controllers\Admin\NotaController::class, 'index'])->name('nota.index');
+    Route::get('/nota/{kunjungan}', [App\Http\Controllers\Admin\NotaController::class, 'show'])->name('nota.show');
+
+    // Obat
     Route::resource('obat', App\Http\Controllers\Admin\ObatController::class)
         ->except(['show']);
 
-    // Kamar (PERBAIKAN: destroy dihapus dari except agar fungsi hapus kamar aktif)
+    // Kamar
     Route::resource('kamar', App\Http\Controllers\Admin\KamarController::class)
         ->except(['show']);
 
-    // Tindakan (Master Data) (PERBAIKAN: ditambahkan 'destroy' ke dalam only)
+    // Tindakan
     Route::resource('tindakan', App\Http\Controllers\Admin\TindakanController::class)
         ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 });
 
-// ---- DOKTER ----
+
+// ---- GROUP DOKTER ----
 Route::prefix('dokter')->name('dokter.')->middleware(['auth', 'role:dokter'])->group(function () {
 
     Route::get('/dashboard', [App\Http\Controllers\Dokter\DashboardController::class, 'index'])

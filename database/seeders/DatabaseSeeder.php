@@ -19,13 +19,12 @@ class DatabaseSeeder extends Seeder
             'aktif'    => true,
         ]);
 
-        // Dokter contoh
+        // Dokter
         User::create([
             'name'      => 'dr. Budi Santoso',
             'email'     => 'dokter@klinik.com',
             'password'  => Hash::make('password'),
             'role'      => 'dokter',
-            'spesialis' => 'Umum',
             'no_hp'     => '081234567890',
             'aktif'     => true,
         ]);

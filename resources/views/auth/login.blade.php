@@ -14,25 +14,38 @@
         </div>
         <div class="card-body p-4">
             <h6 class="mb-3">Masuk ke Sistem</h6>
+
+            {{-- Menampilkan Notifikasi Sukses Setelah Berhasil Ganti Password --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="alert alert-danger">{{ $errors->first() }}</div>
             @endif
+
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="mb-3">
                     <label class="form-label">Email</label>
                     <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
                 </div>
+                
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" name="remember" class="form-check-input" id="remember">
-                    <label class="form-check-label" for="remember">Ingat saya</label>
+
+                {{-- PERBAIKAN: Checkbox 'Remember' dihapus, digantikan link Lupa Password yang rapi di kanan bawah --}}
+                <div class="mb-4 clearfix">
+                    <a href="{{ route('password.request') }}" class="text-decoration-none small float-end">Lupa Password?</a>
                 </div>
+                
                 <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
+
             @if(!App\Models\User::where('role','admin')->exists())
                 <hr>
                 <p class="text-center text-muted small">Belum ada akun admin?
