@@ -17,7 +17,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['admin', 'dokter']);
+            $table->string('no_hp')->nullable();
+            $table->string('spesialis')->nullable();
+            $table->boolean('aktif')->default(true);
             $table->rememberToken();
+            $table->softDeletes(); // 1. PERBAIKAN: Menambahkan kolom deleted_at untuk fitur hapus dokter
             $table->timestamps();
         });
 

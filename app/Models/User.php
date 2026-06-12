@@ -2,31 +2,47 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes; 
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $table = 'users';
+
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'no_hp', 'spesialis', 'aktif'
+    ];
+
+    protected $hidden = [
+        'password', 'remember_token'
+    ];
+
+    protected $casts = [
+        'aktif' => 'boolean',
+    ];
+
+
+    public function isAdmin(): bool
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return strtolower($this->role) === 'admin';
+    }
+
+    public function isDokter(): bool
+    {
+        return strtolower($this->role) === 'dokter';
+    }
+
+    public function kunjungan()
+    {
+        return $this->hasMany(Kunjungan::class, 'dokter_id');
+    }
+
+    public function rawatInap()
+    {
+        return $this->hasMany(RawatInap::class, 'dokter_id');
     }
 }

@@ -2,10 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Medicine;
-use App\Models\MedicalRecord;
-use App\Models\Patient;
-use App\Models\User;
+use App\Models\{User, Obat, Tindakan, Kamar};
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,118 +10,65 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Buat Akun Admin ─────────────────────────────────────────────────
+        // Admin default
         User::create([
-            'name'     => 'Admin Klinik',
+            'name'     => 'Admin',
             'email'    => 'admin@klinik.com',
             'password' => Hash::make('password'),
+            'role'     => 'admin',
+            'aktif'    => true,
         ]);
 
-        // ── Data Pasien Contoh ───────────────────────────────────────────────
-        $patients = [
-            [
-                'nama'          => 'Budi Santoso',
-                'tanggal_lahir' => '1985-03-15',
-                'jenis_kelamin' => 'Laki-laki',
-                'alamat'        => 'Jl. Merdeka No. 10, Surabaya',
-                'no_telepon'    => '081234567890',
-            ],
-            [
-                'nama'          => 'Siti Rahayu',
-                'tanggal_lahir' => '1992-07-22',
-                'jenis_kelamin' => 'Perempuan',
-                'alamat'        => 'Jl. Diponegoro No. 5, Malang',
-                'no_telepon'    => '082345678901',
-            ],
-            [
-                'nama'          => 'Ahmad Fauzi',
-                'tanggal_lahir' => '1978-11-08',
-                'jenis_kelamin' => 'Laki-laki',
-                'alamat'        => 'Jl. Sudirman No. 23, Sidoarjo',
-                'no_telepon'    => '083456789012',
-            ],
-            [
-                'nama'          => 'Dewi Lestari',
-                'tanggal_lahir' => '1995-01-30',
-                'jenis_kelamin' => 'Perempuan',
-                'alamat'        => 'Jl. Imam Bonjol No. 7, Gresik',
-                'no_telepon'    => '084567890123',
-            ],
-            [
-                'nama'          => 'Eko Prasetyo',
-                'tanggal_lahir' => '1988-09-14',
-                'jenis_kelamin' => 'Laki-laki',
-                'alamat'        => 'Jl. Gatot Subroto No. 11, Mojokerto',
-                'no_telepon'    => '085678901234',
-            ],
-        ];
+        // Dokter contoh
+        User::create([
+            'name'      => 'dr. Budi Santoso',
+            'email'     => 'dokter@klinik.com',
+            'password'  => Hash::make('password'),
+            'role'      => 'dokter',
+            'spesialis' => 'Umum',
+            'no_hp'     => '081234567890',
+            'aktif'     => true,
+        ]);
 
-        foreach ($patients as $data) {
-            Patient::create($data);
+        // Kamar rawat inap
+        $kamar = [
+            ['nama_kamar' => 'VIP 1',     'kelas' => 'VIP',     'tarif_per_hari' => 500000, 'kapasitas' => 1],
+            ['nama_kamar' => 'VIP 2',     'kelas' => 'VIP',     'tarif_per_hari' => 500000, 'kapasitas' => 1],
+            ['nama_kamar' => 'Kelas 1 A', 'kelas' => 'Kelas 1', 'tarif_per_hari' => 300000, 'kapasitas' => 2],
+            ['nama_kamar' => 'Kelas 1 B', 'kelas' => 'Kelas 1', 'tarif_per_hari' => 300000, 'kapasitas' => 2],
+            ['nama_kamar' => 'Kelas 2 A', 'kelas' => 'Kelas 2', 'tarif_per_hari' => 200000, 'kapasitas' => 4],
+            ['nama_kamar' => 'Kelas 3 A', 'kelas' => 'Kelas 3', 'tarif_per_hari' => 100000, 'kapasitas' => 6],
+        ];
+        foreach ($kamar as $k) {
+            Kamar::create(array_merge($k, ['status' => 'tersedia']));
         }
 
-        // ── Data Rekam Medis Contoh ──────────────────────────────────────────
-        $records = [
-            [
-                'patient_id'        => 1,
-                'tanggal_kunjungan' => '2024-06-01',
-                'keluhan'           => 'Demam dan sakit kepala selama 2 hari',
-                'diagnosa'          => 'Demam Tifoid',
-                'tindakan'          => 'Pemberian antibiotik dan antipiretik',
-                'catatan'           => 'Pasien disarankan istirahat dan banyak minum air',
-            ],
-            [
-                'patient_id'        => 2,
-                'tanggal_kunjungan' => '2024-06-03',
-                'keluhan'           => 'Batuk dan pilek sudah 3 hari',
-                'diagnosa'          => 'ISPA (Infeksi Saluran Pernapasan Atas)',
-                'tindakan'          => 'Pemberian obat batuk dan vitamin C',
-                'catatan'           => 'Kontrol kembali jika tidak membaik dalam 5 hari',
-            ],
-            [
-                'patient_id'        => 1,
-                'tanggal_kunjungan' => '2024-06-10',
-                'keluhan'           => 'Kontrol setelah pengobatan demam tifoid',
-                'diagnosa'          => 'Evaluasi pasca terapi demam tifoid',
-                'tindakan'          => 'Pengecekan kondisi umum dan lanjut antibiotik',
-                'catatan'           => 'Kondisi membaik, lanjutkan antibiotik 3 hari lagi',
-            ],
-            [
-                'patient_id'        => 3,
-                'tanggal_kunjungan' => '2024-06-05',
-                'keluhan'           => 'Nyeri perut dan mual',
-                'diagnosa'          => 'Gastritis',
-                'tindakan'          => 'Pemberian antasida dan edukasi pola makan',
-                'catatan'           => 'Hindari makanan pedas dan asam',
-            ],
-            [
-                'patient_id'        => 4,
-                'tanggal_kunjungan' => '2024-06-07',
-                'keluhan'           => 'Gatal-gatal di kulit tangan',
-                'diagnosa'          => 'Dermatitis Alergi',
-                'tindakan'          => 'Pemberian antihistamin dan krim kortikosteroid',
-                'catatan'           => 'Identifikasi dan hindari alergen',
-            ],
+        // Tindakan medis
+        $tindakan = [
+            ['kode_tindakan' => 'TND0001', 'nama_tindakan' => 'Pasang Infus',        'tarif' => 75000],
+            ['kode_tindakan' => 'TND0002', 'nama_tindakan' => 'Jahit Luka (5 Jahit)','tarif' => 150000],
+            ['kode_tindakan' => 'TND0003', 'nama_tindakan' => 'Nebulisasi',           'tarif' => 100000],
+            ['kode_tindakan' => 'TND0004', 'nama_tindakan' => 'Injeksi Obat',         'tarif' => 35000],
+            ['kode_tindakan' => 'TND0005', 'nama_tindakan' => 'EKG',                  'tarif' => 125000],
+            ['kode_tindakan' => 'TND0006', 'nama_tindakan' => 'Rontgen Dada',         'tarif' => 200000],
+            ['kode_tindakan' => 'TND0007', 'nama_tindakan' => 'Ganti Perban',         'tarif' => 25000],
         ];
-
-        foreach ($records as $data) {
-            MedicalRecord::create($data);
+        foreach ($tindakan as $t) {
+            Tindakan::create($t);
         }
 
-        // ── Data Obat Contoh ─────────────────────────────────────────────────
-        $medicines = [
-            ['nama_obat' => 'Paracetamol 500mg', 'stok' => 500, 'satuan' => 'Tablet'],
-            ['nama_obat' => 'Amoxicillin 500mg', 'stok' => 200, 'satuan' => 'Kapsul'],
-            ['nama_obat' => 'Antasida DOEN', 'stok' => 150, 'satuan' => 'Tablet'],
-            ['nama_obat' => 'Cetirizine 10mg', 'stok' => 300, 'satuan' => 'Tablet'],
-            ['nama_obat' => 'Vitamin C 50mg', 'stok' => 1000, 'satuan' => 'Tablet'],
-            ['nama_obat' => 'Ambroxol Syrup', 'stok' => 80, 'satuan' => 'Botol'],
-            ['nama_obat' => 'Ibuprofen 400mg', 'stok' => 250, 'satuan' => 'Tablet'],
-            ['nama_obat' => 'ORS (Oralit)', 'stok' => 400, 'satuan' => 'Sachet'],
+        // Obat contoh
+        $obat = [
+            ['kode_obat' => 'OBT0001', 'nama_obat' => 'Paracetamol 500mg',    'satuan' => 'tablet', 'stok' => 1000, 'stok_minimum' => 100, 'harga_beli' => 500,   'harga_jual' => 1000,  'kategori' => 'Analgesik'],
+            ['kode_obat' => 'OBT0002', 'nama_obat' => 'Amoxicillin 500mg',    'satuan' => 'kapsul', 'stok' => 500,  'stok_minimum' => 50,  'harga_beli' => 1500,  'harga_jual' => 3000,  'kategori' => 'Antibiotik'],
+            ['kode_obat' => 'OBT0003', 'nama_obat' => 'Omeprazole 20mg',      'satuan' => 'kapsul', 'stok' => 300,  'stok_minimum' => 50,  'harga_beli' => 2000,  'harga_jual' => 4000,  'kategori' => 'Lambung'],
+            ['kode_obat' => 'OBT0004', 'nama_obat' => 'Cetirizine 10mg',      'satuan' => 'tablet', 'stok' => 400,  'stok_minimum' => 50,  'harga_beli' => 1000,  'harga_jual' => 2000,  'kategori' => 'Antihistamin'],
+            ['kode_obat' => 'OBT0005', 'nama_obat' => 'Ibuprofen 400mg',      'satuan' => 'tablet', 'stok' => 600,  'stok_minimum' => 100, 'harga_beli' => 1000,  'harga_jual' => 2000,  'kategori' => 'Analgesik'],
+            ['kode_obat' => 'OBT0006', 'nama_obat' => 'Infus NaCl 500ml',     'satuan' => 'botol',  'stok' => 100,  'stok_minimum' => 20,  'harga_beli' => 25000, 'harga_jual' => 40000, 'kategori' => 'Infus'],
+            ['kode_obat' => 'OBT0007', 'nama_obat' => 'Vitamin C 500mg',      'satuan' => 'tablet', 'stok' => 800,  'stok_minimum' => 100, 'harga_beli' => 500,   'harga_jual' => 1500,  'kategori' => 'Vitamin'],
         ];
-
-        foreach ($medicines as $data) {
-            Medicine::create($data);
+        foreach ($obat as $o) {
+            Obat::create($o);
         }
     }
 }
